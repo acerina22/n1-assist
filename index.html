@@ -1,0 +1,1193 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>N1 Assist · Gestión guiada de incidentes</title>
+<style>
+  :root {
+    --bg: #f3f6fa;
+    --surface: #ffffff;
+    --ink: #172335;
+    --muted: #66758a;
+    --line: #dfe6ee;
+    --navy: #162b49;
+    --blue: #2563eb;
+    --blue-hover: #1d4ed8;
+    --blue-soft: #eaf1ff;
+    --teal: #0e9384;
+    --teal-soft: #e7f7f4;
+    --amber: #a65b06;
+    --amber-soft: #fff5df;
+    --shadow: 0 10px 30px rgba(26, 43, 68, .07);
+    --radius: 16px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 14px/1.5 Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  button, input, select, textarea { font: inherit; }
+  button { cursor: pointer; }
+  .shell {
+    max-width: 1280px;
+    padding: 20px 20px 48px;
+    margin: 0 auto;
+  }
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand-mark {
+    width: 42px;
+    height: 42px;
+    display: grid;
+    place-items: center;
+    border-radius: 12px;
+    color: #fff;
+    background: linear-gradient(145deg, #18375e, #2563eb);
+    box-shadow: 0 6px 16px #2563eb30;
+    font-size: 19px;
+    font-weight: 800;
+  }
+  .brand-name { font-size: 18px; font-weight: 800; letter-spacing: -.03em; color: var(--navy); }
+  .brand-sub { color: var(--muted); font-size: 12px; margin-top: 1px; }
+  .topbar-right { display: flex; align-items: center; gap: 10px; }
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: #35516f;
+    background: #e8eef6;
+    padding: 7px 13px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 650;
+    white-space: nowrap;
+  }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #94a3b8; }
+  .status-dot.online { background: #10b981; box-shadow: 0 0 0 3px #10b98125; }
+
+  .hero-compact {
+    background: linear-gradient(120deg, #152a46 0%, #1d416d 70%, #275c8c 100%);
+    color: white;
+    padding: 18px 24px;
+    border-radius: var(--radius);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+  }
+  .hero-compact h1 { font-size: 21px; margin: 0 0 3px; letter-spacing: -.03em; }
+  .hero-compact p { color: #d5e3f5; margin: 0; font-size: 13px; max-width: 780px; }
+  .hero-badge {
+    background: #ffffff18;
+    border: 1px solid #ffffff2a;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    white-space: nowrap;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.22fr) minmax(420px, 1fr);
+    gap: 20px;
+    align-items: start;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 20px 22px;
+    box-shadow: var(--shadow);
+    margin-bottom: 18px;
+  }
+  .card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--line);
+  }
+  .card-head h2 {
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: -.02em;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--navy);
+  }
+  .card-head .sec-num {
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 7px;
+    background: var(--blue-soft);
+    color: var(--blue);
+    font-size: 12px;
+    font-weight: 800;
+  }
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 9px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    background: #edf1f6;
+    color: #5a6c83;
+  }
+
+  .issue-selector {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .issue-btn {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    background: #fff;
+    border: 2px solid var(--line);
+    border-radius: 13px;
+    text-align: left;
+    transition: all .15s ease;
+  }
+  .issue-btn:hover {
+    border-color: #9bb7f5;
+    background: #fbfdff;
+    transform: translateY(-1px);
+  }
+  .issue-btn.selected {
+    border-color: var(--blue);
+    background: #f4f7ff;
+    box-shadow: 0 0 0 3px #2563eb12;
+  }
+  .issue-btn .icon {
+    width: 38px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    font-size: 18px;
+    border-radius: 10px;
+    background: var(--blue-soft);
+    flex-shrink: 0;
+  }
+  .issue-btn strong { display: block; font-size: 14px; color: var(--ink); margin-bottom: 2px; }
+  .issue-btn small { color: var(--muted); font-size: 12px; display: block; line-height: 1.35; }
+
+  .field-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px 12px;
+  }
+  .field { min-width: 0; }
+  .field.full { grid-column: 1 / -1; }
+  label {
+    display: block;
+    font-size: 12px;
+    font-weight: 750;
+    color: #304057;
+    margin: 0 0 5px;
+  }
+  .hint { color: var(--muted); font-size: 11px; margin-top: 4px; line-height: 1.35; }
+  input, select, textarea {
+    width: 100%;
+    color: var(--ink);
+    background: #fbfcfe;
+    border: 1px solid #d6dfea;
+    border-radius: 9px;
+    padding: 8px 11px;
+    outline: none;
+    transition: border-color .15s, box-shadow .15s, background .15s;
+    font-size: 13px;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: #80a6f8;
+    box-shadow: 0 0 0 3px #2563eb17;
+    background: white;
+  }
+  textarea { resize: vertical; min-height: 64px; }
+  input::placeholder, textarea::placeholder { color: #9aa6b6; }
+
+  .subhead {
+    margin: 18px 0 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--line);
+    color: #38506c;
+    font-size: 11px;
+    font-weight: 850;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+  }
+
+  .notice {
+    padding: 11px 13px;
+    border-radius: 11px;
+    display: flex;
+    gap: 10px;
+    font-size: 12px;
+    margin-bottom: 14px;
+    line-height: 1.4;
+  }
+  .notice .notice-icon { font-size: 16px; flex-shrink: 0; }
+  .notice.info { background: var(--blue-soft); color: #284f91; border: 1px solid #d5e2ff; }
+  .notice.warning { background: var(--amber-soft); color: #80500d; border: 1px solid #f4dfb5; }
+  .notice.success { background: var(--teal-soft); color: #17685f; border: 1px solid #c7ece5; }
+  .notice strong { display: block; margin-bottom: 2px; }
+
+  .checkbox-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    padding: 10px 12px;
+    background: #f8fafc;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+  }
+  .checkbox-row input {
+    width: 16px;
+    height: 16px;
+    margin: 2px 0 0;
+    accent-color: var(--blue);
+    flex-shrink: 0;
+  }
+  .checkbox-row label { margin: 0; font-weight: 600; line-height: 1.35; font-size: 12px; cursor: pointer; }
+
+  .preview-pane {
+    position: sticky;
+    top: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .summary-box {
+    width: 100%;
+    min-height: 360px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 11.5px;
+    line-height: 1.55;
+    background: #172437;
+    color: #e6edf8;
+    border: 1px solid #23354f;
+    border-radius: 11px;
+    padding: 14px;
+    white-space: pre-wrap;
+    tab-size: 2;
+  }
+  .summary-box:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px #3b82f630;
+    background: #152031;
+  }
+  .email-box {
+    min-height: 170px;
+    background: #fbfcfe;
+    color: var(--ink);
+    border: 1px solid #d6dfea;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    border: 1px solid transparent;
+    border-radius: 9px;
+    padding: 9px 14px;
+    font-weight: 750;
+    font-size: 12.5px;
+    min-height: 38px;
+    transition: .15s;
+  }
+  .btn:focus-visible { outline: 3px solid #93b4ff; outline-offset: 2px; }
+  .btn.primary { color: white; background: var(--blue); box-shadow: 0 4px 10px #2563eb25; }
+  .btn.primary:hover { background: var(--blue-hover); }
+  .btn.success { color: white; background: #059669; box-shadow: 0 4px 10px #05966925; }
+  .btn.success:hover { background: #047857; }
+  .btn.secondary { color: #34455b; background: #fff; border-color: #d8e0e9; }
+  .btn.secondary:hover { background: #f7f9fc; }
+  .btn.ghost { color: #65748a; background: transparent; }
+  .btn.ghost:hover { background: #eef2f7; color: #172335; }
+  .btn.sm { padding: 6px 10px; min-height: 30px; font-size: 11.5px; }
+
+  .actions-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .actions-group { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  /* Modal de Historial de Tickets */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s ease;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: auto; }
+  .modal-card {
+    background: #fff;
+    width: 90%;
+    max-width: 780px;
+    max-height: 85vh;
+    border-radius: 18px;
+    box-shadow: 0 20px 45px rgba(0,0,0,.2);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .modal-header {
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .modal-header h3 { margin: 0; font-size: 17px; font-weight: 800; color: var(--navy); }
+  .modal-body {
+    padding: 20px 24px;
+    overflow-y: auto;
+    flex: 1;
+  }
+  .modal-search { margin-bottom: 16px; }
+  .ticket-list { display: flex; flex-direction: column; gap: 10px; }
+  .ticket-item {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 12px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    transition: border-color .15s, background .15s;
+  }
+  .ticket-item:hover { border-color: #9bb7f5; background: #fbfdff; }
+  .ticket-info strong { font-size: 14px; color: var(--ink); display: block; margin-bottom: 2px; }
+  .ticket-info small { color: var(--muted); font-size: 12px; }
+  .ticket-badge {
+    padding: 3px 8px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+  .ticket-badge.corte { background: #fee2e2; color: #b91c1c; }
+  .ticket-badge.degradacion { background: #fef3c7; color: #b45309; }
+
+  details.guide-accordion {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-size: 12px;
+  }
+  details.guide-accordion summary {
+    font-weight: 750;
+    color: #38506c;
+    cursor: pointer;
+    user-select: none;
+    outline: none;
+  }
+  details.guide-accordion[open] summary { margin-bottom: 10px; }
+  .guide-content { color: var(--muted); line-height: 1.5; }
+  .guide-content ul { margin: 6px 0 0; padding-left: 18px; }
+  .guide-content li { margin-bottom: 4px; }
+
+  .hidden { display: none !important; }
+  .footer {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 28px 4px 0;
+    color: #8490a0;
+    font-size: 11px;
+    border-top: 1px solid var(--line);
+    padding-top: 14px;
+  }
+  .toast {
+    position: fixed;
+    bottom: 22px;
+    left: 50%;
+    transform: translate(-50%, 20px);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 200;
+    color: #fff;
+    background: #18304f;
+    padding: 11px 18px;
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    font-size: 13px;
+    font-weight: 600;
+    transition: .2s;
+  }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+  @media (max-width: 980px) {
+    .layout { grid-template-columns: 1fr; }
+    .preview-pane { position: static; }
+    .summary-box { min-height: 300px; }
+  }
+  @media (max-width: 640px) {
+    .shell { padding: 14px 10px 30px; }
+    .hero-compact { flex-direction: column; align-items: flex-start; gap: 8px; }
+    .issue-selector, .field-grid { grid-template-columns: 1fr; }
+    .actions-bar { flex-direction: column; align-items: stretch; }
+    .actions-group { width: 100%; }
+    .actions-group .btn { flex: 1; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <!-- BARRA SUPERIOR -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark">N1</div>
+      <div>
+        <div class="brand-name">N1 Assist</div>
+        <div class="brand-sub">Gestión guiada de incidentes · Redes & TI</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <button class="btn secondary sm" id="btnOpenHistory" type="button">📂 Historial de reclamos</button>
+      <div class="status-pill" id="apiStatusPill">
+        <span class="status-dot" id="apiStatusDot"></span>
+        <span id="apiStatusText">Verificando conexión…</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- BANNER COMPACTO -->
+  <section class="hero-compact">
+    <div>
+      <h1>Formulario operativo de incidentes</h1>
+      <p>Cargá los datos del cliente y técnicos en el formulario izquierdo. La plantilla de reclamo se genera en tiempo real y puede guardarse en la base de datos.</p>
+    </div>
+    <span class="hero-badge" id="envBadge">Render & Local Ready</span>
+  </section>
+
+  <!-- LAYOUT PRINCIPAL -->
+  <div class="layout">
+    <!-- COLUMNA IZQUIERDA: FORMULARIO -->
+    <div class="form-column">
+      
+      <!-- 1. TIPO DE INCIDENCIA -->
+      <section class="card">
+        <div class="card-head">
+          <h2><span class="sec-num">1</span> Tipo de incidencia</h2>
+          <span class="tag" id="activeIssueBadge">CORTE</span>
+        </div>
+        <div class="issue-selector">
+          <button type="button" class="issue-btn selected" id="btnCorte" data-issue="corte">
+            <span class="icon">⚡</span>
+            <div>
+              <strong>Corte de servicio</strong>
+              <small>Servicio caído. Datos de equipo, alarmas, LEDs y última milla.</small>
+            </div>
+          </button>
+          <button type="button" class="issue-btn" id="btnDegradacion" data-issue="degradacion">
+            <span class="icon">〽</span>
+            <div>
+              <strong>Degradación / baja performance</strong>
+              <small>Latencia, lentitud o pérdida de paquetes. Pruebas de conectividad.</small>
+            </div>
+          </button>
+        </div>
+      </section>
+
+      <!-- 2. DATOS GENERALES DEL RECLAMO -->
+      <section class="card">
+        <div class="card-head">
+          <h2><span class="sec-num">2</span> Datos generales del reclamo</h2>
+          <span class="tag">Cliente & Sitio</span>
+        </div>
+        <div class="field-grid">
+          <div class="field">
+            <label for="cliente">Cliente / razón social *</label>
+            <input id="cliente" placeholder="Nombre del cliente" required>
+          </div>
+          <div class="field">
+            <label for="servicio">Número de servicio *</label>
+            <input id="servicio" placeholder="Identificador del servicio" required>
+          </div>
+          <div class="field">
+            <label for="tipoServicio">Tipo de servicio</label>
+            <select id="tipoServicio">
+              <option value="">Seleccionar…</option>
+              <option>INT</option>
+              <option>ISI</option>
+              <option>RPV</option>
+              <option>TLS</option>
+              <option>EWS</option>
+              <option>ATI</option>
+              <option>IPT</option>
+              <option>Otro</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="horarioFalla">Inicio de la falla según cliente</label>
+            <input id="horarioFalla" placeholder="Fecha y hora informada">
+          </div>
+          <div class="field full">
+            <label for="titulo">Título del ticket / ID de enlace</label>
+            <input id="titulo" placeholder="ID de enlace o descripción breve">
+          </div>
+          <div class="field">
+            <label for="domicilio">Domicilio en proveedor</label>
+            <input id="domicilio" placeholder="Domicilio registrado">
+          </div>
+          <div class="field">
+            <label for="reclama">Persona que reclama</label>
+            <input id="reclama" placeholder="Nombre y teléfono">
+          </div>
+          <div class="field">
+            <label for="contacto">Contacto en sitio</label>
+            <input id="contacto" placeholder="Nombre y teléfono">
+          </div>
+          <div class="field">
+            <label for="horario">Disponibilidad para visita técnica</label>
+            <input id="horario" placeholder="Días y horarios">
+          </div>
+          <div class="field full">
+            <label for="docIngreso">Documentación / requisitos para el ingreso</label>
+            <textarea id="docIngreso" rows="2" placeholder="Preguntar al cliente qué documentación o requisitos se necesitan."></textarea>
+            <div class="hint">Pregunta sugerida: “¿Qué documentación o requisitos debemos presentar para gestionar el ingreso al sitio?”</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3A. DATOS TÉCNICOS: CORTE -->
+      <section class="card" id="techCorteSection">
+        <div class="card-head">
+          <h2><span class="sec-num">3</span> Datos técnicos · Corte</h2>
+          <span class="tag">Equipamiento & Enlace</span>
+        </div>
+        <div class="notice info">
+          <span class="notice-icon">💡</span>
+          <div><strong>Recordatorio:</strong> Solicitar al cliente fotos o estado de las luces/LED del equipo y registrar qué indicadores observa.</div>
+        </div>
+        <div class="field-grid">
+          <div class="field">
+            <label for="tecnologia">Tecnología de última milla</label>
+            <select id="tecnologia">
+              <option value="">Seleccionar…</option>
+              <option value="GPON">GPON</option>
+              <option value="MetroEthernet">MetroEthernet</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="equipoUM">Equipo de última milla</label>
+            <input id="equipoUM" placeholder="Nombre/modelo del equipo">
+          </div>
+          <div class="field">
+            <label for="nodo">Nodo</label>
+            <input id="nodo" placeholder="Nodo">
+          </div>
+          <div class="field hidden" id="fieldOlt">
+            <label for="olt">OLT slot / port / ID</label>
+            <input id="olt" placeholder="Datos OLT">
+          </div>
+          <div class="field hidden" id="fieldOnt">
+            <label for="ont">ONT SN</label>
+            <input id="ont" placeholder="Número de serie ONT">
+          </div>
+          <div class="field hidden full" id="fieldSwitch">
+            <label for="switchPuerto">Switch / puerto afectado</label>
+            <input id="switchPuerto" placeholder="Switch y puerto">
+          </div>
+        </div>
+
+        <div class="subhead">Estado del sitio y del equipo</div>
+        <div class="field-grid">
+          <div class="field">
+            <label for="encendido">¿El equipo está encendido?</label>
+            <select id="encendido">
+              <option value="">Sin informar</option>
+              <option>Sí</option>
+              <option>No</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="energia">¿Hay energía en el sitio?</label>
+            <select id="energia">
+              <option value="">Sin informar</option>
+              <option>Sí</option>
+              <option>No</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="reinicio">¿Se reinició el equipo?</label>
+            <select id="reinicio">
+              <option value="">Sin informar</option>
+              <option>Sí</option>
+              <option>No</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="alarma">¿Hay una alarma visible?</label>
+            <select id="alarma">
+              <option value="">Sin informar</option>
+              <option>Sí</option>
+              <option>No</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="tipoAlarma">Tipo de alarma</label>
+            <input id="tipoAlarma" placeholder="LOS / LOF / Interface Down / otra">
+          </div>
+          <div class="field">
+            <label for="led">LED / luces observadas</label>
+            <input id="led" placeholder="PWR / ALM / SFP / otro">
+          </div>
+          <div class="field">
+            <label for="dbm">Potencia del transceiver (dBm)</label>
+            <input id="dbm" placeholder="Si aplica">
+          </div>
+          <div class="field full">
+            <div class="checkbox-row">
+              <input type="checkbox" id="lucesSolicitadas">
+              <label for="lucesSolicitadas">Se solicitó al cliente una prueba o foto de las luces/LED del equipo.</label>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3B. DATOS TÉCNICOS: DEGRADACIÓN -->
+      <section class="card hidden" id="techDegradacionSection">
+        <div class="card-head">
+          <h2><span class="sec-num">3</span> Datos técnicos · Degradación</h2>
+          <span class="tag">Métricas & Pruebas</span>
+        </div>
+        <div class="notice warning">
+          <span class="notice-icon">✉</span>
+          <div><strong>Acción requerida:</strong> Solicitar ping y traceroute. El borrador de email se genera automáticamente a la derecha listo para copiar.</div>
+        </div>
+        <div class="field-grid">
+          <div class="field">
+            <label for="bw">Ancho de banda contratado</label>
+            <input id="bw" placeholder="Ej.: 100 Mbps">
+          </div>
+          <div class="field">
+            <label for="medicion">Medición del cliente</label>
+            <input id="medicion" placeholder="Ej.: 20 Mbps por speedtest">
+          </div>
+          <div class="field">
+            <label for="ipOrigen">IP de origen</label>
+            <input id="ipOrigen" placeholder="IP origen del cliente">
+          </div>
+          <div class="field">
+            <label for="ipDestino">IP de destino</label>
+            <input id="ipDestino" placeholder="IP destino de prueba">
+          </div>
+          <div class="field">
+            <label for="ping">Resultado de ping</label>
+            <textarea id="ping" rows="2" placeholder="Tiempos, latencia, paquetes perdidos"></textarea>
+          </div>
+          <div class="field">
+            <label for="tracert">Traceroute / salto afectado</label>
+            <textarea id="tracert" rows="2" placeholder="Hop donde se corta o eleva latencia"></textarea>
+          </div>
+          <div class="field full">
+            <label for="estadoPruebas">Estado de la solicitud de pruebas</label>
+            <select id="estadoPruebas">
+              <option>Pendiente de solicitar</option>
+              <option>Email enviado</option>
+              <option>Pruebas recibidas</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- COLUMNA DERECHA: SALIDA Y ACCIONES -->
+    <div class="preview-pane">
+      
+      <!-- CARD PLANTILLA DE RECLAMO -->
+      <section class="card" style="margin-bottom:0;">
+        <div class="card-head">
+          <h2>Vista previa del reclamo</h2>
+          <span class="tag" style="background:#eaf1ff;color:#2563eb;">Tiempo real</span>
+        </div>
+
+        <div class="notice success" style="margin-bottom:12px;padding:8px 12px;">
+          <span class="notice-icon">✓</span>
+          <div>Se actualiza en vivo a medida que completás los campos.</div>
+        </div>
+
+        <div class="field">
+          <textarea id="output" class="summary-box" spellcheck="false"></textarea>
+        </div>
+
+        <div class="actions-bar">
+          <div class="actions-group">
+            <button class="btn success" type="button" id="btnSaveDb">💾 Guardar en BD</button>
+            <button class="btn primary" type="button" id="copyOutput">📋 Copiar reclamo</button>
+            <button class="btn secondary" type="button" id="downloadOutput">💾 Descargar .txt</button>
+          </div>
+          <button class="btn ghost sm" type="button" id="newTicket" title="Limpiar todos los campos">🔄 Limpiar</button>
+        </div>
+      </section>
+
+      <!-- CARD BORRADOR DE EMAIL (SOLO DEGRADACIÓN) -->
+      <section class="card hidden" id="emailCard" style="margin-bottom:0;">
+        <div class="card-head">
+          <h2>✉ Borrador de email para el cliente</h2>
+          <span class="tag" style="background:var(--amber-soft);color:var(--amber);">Degradación</span>
+        </div>
+        <p style="color:var(--muted);font-size:12px;margin:0 0 10px;">Copia y pega este texto en tu cliente de correo para solicitar las pruebas:</p>
+        <div class="field">
+          <textarea id="emailOutput" class="summary-box email-box" spellcheck="false"></textarea>
+        </div>
+        <div class="actions-bar">
+          <button class="btn secondary" type="button" id="copyEmail">📋 Copiar email al portapapeles</button>
+        </div>
+      </section>
+
+      <!-- GUÍA RÁPIDA COLAPSABLE -->
+      <details class="guide-accordion">
+        <summary>ℹ Guía del operador y buenas prácticas</summary>
+        <div class="guide-content">
+          <ul>
+            <li><strong>Verificación:</strong> Confirmar que el domicilio coincida con el registrado en sistema.</li>
+            <li><strong>Requisitos:</strong> Consultar siempre documentación necesaria para el ingreso de técnicos.</li>
+            <li><strong>Evidencias:</strong> Pedir fotos de LEDs o resultados de pruebas antes de escalar.</li>
+            <li><strong>Persistencia:</strong> Podés guardar los tickets en la base de datos para no perderlos y consultarlos en el Historial.</li>
+          </ul>
+        </div>
+      </details>
+
+    </div>
+  </div>
+
+  <div class="footer">
+    <span>N1 Assist · Fullstack Ready</span>
+    <span>Soporta Render (PostgreSQL) y ejecución local</span>
+  </div>
+</div>
+
+<!-- MODAL DE HISTORIAL DE TICKETS -->
+<div class="modal-overlay" id="historyModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>Historial de reclamos guardados</h3>
+      <button class="btn ghost sm" id="btnCloseHistory" type="button">✖ Cerrar</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-search">
+        <input type="text" id="historySearch" placeholder="Buscar por cliente, nro. de servicio o título…">
+      </div>
+      <div class="ticket-list" id="ticketList">
+        <div style="text-align:center;padding:30px;color:var(--muted);">Cargando tickets…</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+  'use strict';
+  let issue = 'corte';
+  let apiOnline = false;
+  const $ = (id) => document.getElementById(id);
+  const values = (ids) => Object.fromEntries(ids.map(id => [id, $(id)?.value?.trim() || '']));
+  
+  const allCommonIds = ['cliente','servicio','tipoServicio','horarioFalla','titulo','domicilio','reclama','contacto','horario','docIngreso'];
+  const cutIds = ['tecnologia','equipoUM','nodo','olt','ont','switchPuerto','encendido','energia','reinicio','alarma','tipoAlarma','led','dbm'];
+  const degIds = ['bw','medicion','ipOrigen','ipDestino','ping','tracert','estadoPruebas'];
+
+  function showToast(message) {
+    const toast = $('toast');
+    toast.textContent = message;
+    toast.classList.add('show');
+    window.clearTimeout(toast._timer);
+    toast._timer = window.setTimeout(() => toast.classList.remove('show'), 2600);
+  }
+
+  // Comprobar si el Backend API está activo
+  async function checkApiHealth() {
+    try {
+      const res = await fetch('/health');
+      if (res.ok) {
+        apiOnline = true;
+        $('apiStatusDot').classList.add('online');
+        $('apiStatusText').textContent = 'Base de Datos Conectada';
+        return;
+      }
+    } catch (e) {
+      // Offline / Modo estático
+    }
+    apiOnline = false;
+    $('apiStatusDot').classList.remove('online');
+    $('apiStatusText').textContent = 'Modo Local (Sin BD)';
+  }
+
+  function setIssue(nextIssue) {
+    issue = nextIssue;
+    const isCorte = issue === 'corte';
+
+    $('btnCorte').classList.toggle('selected', isCorte);
+    $('btnDegradacion').classList.toggle('selected', !isCorte);
+    $('activeIssueBadge').textContent = isCorte ? 'CORTE' : 'DEGRADACIÓN';
+
+    $('techCorteSection').classList.toggle('hidden', !isCorte);
+    $('techDegradacionSection').classList.toggle('hidden', isCorte);
+    $('emailCard').classList.toggle('hidden', isCorte);
+
+    buildOutput();
+  }
+
+  function toggleTechnologyFields() {
+    const tech = $('tecnologia').value;
+    $('fieldOlt').classList.toggle('hidden', tech !== 'GPON');
+    $('fieldOnt').classList.toggle('hidden', tech !== 'GPON');
+    $('fieldSwitch').classList.toggle('hidden', tech !== 'MetroEthernet');
+    buildOutput();
+  }
+
+  function pair(label, value) {
+    return `${label.padEnd(27, ' ')}: ${value || 'No informado'}`;
+  }
+
+  function getCommon() {
+    return values(allCommonIds);
+  }
+
+  function makeOutput() {
+    const c = getCommon();
+    const now = new Date();
+    const timestamp = new Intl.DateTimeFormat('es-AR', { dateStyle: 'short', timeStyle: 'short' }).format(now);
+    const lines = [
+      'N1 ASSIST · PLANTILLA DE RECLAMO',
+      '='.repeat(64),
+      pair('TÍTULO DEL TICKET', c.titulo),
+      pair('TIPO DE FALLA', issue === 'corte' ? 'CORTE DE SERVICIO' : 'DEGRADACIÓN / BAJA PERFORMANCE'),
+      pair('FECHA/HORA DE PREPARACIÓN', timestamp),
+      pair('TIPO DE SERVICIO', c.tipoServicio),
+      pair('CLIENTE', c.cliente),
+      pair('NRO. DE SERVICIO', c.servicio),
+      pair('INICIO DE FALLA', c.horarioFalla),
+      pair('DOMICILIO EN PROVEEDOR', c.domicilio),
+      pair('VALIDACIÓN DE DOMICILIO', 'Confirmar si coincide con el domicilio informado por el cliente'),
+      pair('QUIÉN RECLAMA', c.reclama),
+      pair('CONTACTO EN SITIO', c.contacto),
+      pair('HORARIO PARA VISITA', c.horario),
+      pair('DOCUMENTACIÓN / INGRESO', c.docIngreso),
+      '',
+      '--- DATOS TÉCNICOS ---'
+    ];
+
+    if (issue === 'corte') {
+      const v = values(cutIds);
+      lines.push(
+        pair('TECNOLOGÍA ÚLTIMA MILLA', v.tecnologia),
+        pair('EQUIPO ÚLTIMA MILLA', v.equipoUM),
+        pair('NODO', v.nodo)
+      );
+      if (v.tecnologia === 'GPON') lines.push(pair('OLT SLOT / PORT / ID', v.olt), pair('ONT SN', v.ont));
+      if (v.tecnologia === 'MetroEthernet') lines.push(pair('SWITCH / PUERTO', v.switchPuerto));
+      lines.push(
+        pair('EQUIPO ENCENDIDO', v.encendido),
+        pair('ENERGÍA EN SITIO', v.energia),
+        pair('EQUIPO REINICIADO', v.reinicio),
+        pair('ALARMA VISIBLE', v.alarma),
+        pair('TIPO DE ALARMA', v.tipoAlarma),
+        pair('LEDS / LUCES', v.led),
+        pair('POTENCIA TRANSCEIVER (dBm)', v.dbm),
+        pair('PRUEBA/FOTO DE LUCES SOLICITADA', $('lucesSolicitadas').checked ? 'Sí' : 'No informado')
+      );
+    } else {
+      const v = values(degIds);
+      lines.push(
+        pair('BW CONTRATADO', v.bw),
+        pair('IP ORIGEN', v.ipOrigen),
+        pair('IP DESTINO', v.ipDestino),
+        pair('PING RESULTADO', v.ping),
+        pair('TRACEROUTE / HOP', v.tracert),
+        pair('MEDICIÓN DEL CLIENTE', v.medicion),
+        pair('ESTADO SOLICITUD PING/TRACEROUTE', v.estadoPruebas)
+      );
+    }
+    lines.push('', '--- OBSERVACIONES ---', '', '');
+    return lines.join('\n');
+  }
+
+  function makeEmail() {
+    const c = getCommon();
+    const v = values(['ipOrigen','ipDestino']);
+    const subject = `Solicitud de pruebas de conectividad - ${c.servicio || '[número de servicio]'} - ${c.cliente || '[cliente]'}`;
+    const target = v.ipDestino ? `El destino sugerido para las pruebas es: ${v.ipDestino}.` : 'Por favor, confirmar con el área técnica el destino hacia el cual realizar las pruebas.';
+    const body = [
+      'Hola,',
+      '',
+      'Para continuar con el análisis del incidente de degradación / baja performance del servicio, necesitamos que nos envíen los resultados de las siguientes pruebas:',
+      '',
+      '1. Ping hacia el destino indicado por soporte.',
+      '2. Traceroute hacia ese mismo destino.',
+      '',
+      target,
+      v.ipOrigen ? `IP de origen informada: ${v.ipOrigen}.` : '',
+      'Por favor, adjuntar o copiar los resultados completos e indicar la fecha y hora en que se realizaron las pruebas.',
+      '',
+      'Cliente: ' + (c.cliente || '[cliente]'),
+      'Número de servicio: ' + (c.servicio || '[número de servicio]'),
+      c.titulo ? 'Referencia: ' + c.titulo : '',
+      '',
+      'Gracias.'
+    ].filter((line, index, arr) => !(line === '' && arr[index - 1] === '')).join('\n');
+    return { subject, body };
+  }
+
+  function buildOutput() {
+    $('output').value = makeOutput();
+    if (issue === 'degradacion') {
+      const email = makeEmail();
+      $('emailOutput').value = `ASUNTO: ${email.subject}\n\n${email.body}`;
+    }
+  }
+
+  // Guardar en la Base de Datos
+  async function saveToDatabase() {
+    const c = getCommon();
+    if (!c.cliente || !c.servicio) {
+      showToast('⚠️ Completá Cliente y Nro. de Servicio para guardar.');
+      (!c.cliente ? $('cliente') : $('servicio')).focus();
+      return;
+    }
+
+    const payload = {
+      issue_type: issue,
+      cliente: c.cliente,
+      servicio: c.servicio,
+      tipo_servicio: c.tipoServicio,
+      horario_falla: c.horarioFalla,
+      titulo: c.titulo,
+      domicilio: c.domicilio,
+      reclama: c.reclama,
+      contacto: c.contacto,
+      horario_visita: c.horario,
+      doc_ingreso: c.docIngreso,
+      tech_data: issue === 'corte' ? values(cutIds) : values(degIds),
+      raw_output: $('output').value
+    };
+
+    if (!apiOnline) {
+      // Si está en modo offline (abierto como archivo), guarda localmente en localStorage
+      try {
+        const local = JSON.parse(localStorage.getItem('n1_saved_tickets') || '[]');
+        payload.id = Date.now();
+        payload.created_at = new Date().toLocaleString('es-AR');
+        local.unshift(payload);
+        localStorage.setItem('n1_saved_tickets', JSON.stringify(local.slice(0, 50)));
+        showToast('✓ Guardado en memoria local de tu navegador.');
+      } catch (e) {
+        showToast('Error al guardar localmente.');
+      }
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/tickets', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        showToast('✓ Ticket guardado con éxito en la Base de Datos.');
+      } else {
+        showToast('Error del servidor al guardar.');
+      }
+    } catch (err) {
+      showToast('No se pudo conectar con el servidor.');
+    }
+  }
+
+  // Cargar Historial
+  async function loadHistory(query = '') {
+    const list = $('ticketList');
+    list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);">Cargando tickets…</div>';
+
+    let tickets = [];
+    if (apiOnline) {
+      try {
+        const url = query ? `/api/tickets?q=${encodeURIComponent(query)}` : '/api/tickets';
+        const res = await fetch(url);
+        if (res.ok) tickets = await res.json();
+      } catch (e) {}
+    } else {
+      // Local fallback
+      try {
+        tickets = JSON.parse(localStorage.getItem('n1_saved_tickets') || '[]');
+        if (query) {
+          const q = query.toLowerCase();
+          tickets = tickets.filter(t => (t.cliente || '').toLowerCase().includes(q) || (t.servicio || '').toLowerCase().includes(q));
+        }
+      } catch (e) {}
+    }
+
+    if (!tickets.length) {
+      list.innerHTML = '<div style="text-align:center;padding:30px;color:var(--muted);">No hay reclamos guardados aún.</div>';
+      return;
+    }
+
+    list.innerHTML = '';
+    tickets.forEach(t => {
+      const item = document.createElement('div');
+      item.className = 'ticket-item';
+      item.innerHTML = `
+        <div class="ticket-info">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;">
+            <span class="ticket-badge ${t.issue_type}">${t.issue_type === 'corte' ? 'CORTE' : 'DEGRADACIÓN'}</span>
+            <small>${t.created_at || ''}</small>
+          </div>
+          <strong>${t.cliente || 'Sin cliente'} · Serv. ${t.servicio || 'S/N'}</strong>
+          <small>${t.titulo || 'Sin descripción'}</small>
+        </div>
+        <button class="btn secondary sm" data-load="${t.id}">Cargar</button>
+      `;
+      item.querySelector('[data-load]').addEventListener('click', () => loadTicketIntoForm(t));
+      list.appendChild(item);
+    });
+  }
+
+  function loadTicketIntoForm(t) {
+    setIssue(t.issue_type || 'corte');
+    $('cliente').value = t.cliente || '';
+    $('servicio').value = t.servicio || '';
+    $('tipoServicio').value = t.tipo_servicio || '';
+    $('horarioFalla').value = t.horario_falla || '';
+    $('titulo').value = t.titulo || '';
+    $('domicilio').value = t.domicilio || '';
+    $('reclama').value = t.reclama || '';
+    $('contacto').value = t.contacto || '';
+    $('horario').value = t.horario_visita || '';
+    $('docIngreso').value = t.doc_ingreso || '';
+
+    if (t.tech_data) {
+      Object.entries(t.tech_data).forEach(([key, val]) => {
+        if ($(key)) $(key).value = val;
+      });
+    }
+
+    toggleTechnologyFields();
+    buildOutput();
+    $('historyModal').classList.remove('open');
+    showToast(`Reclamo #${t.servicio} cargado al formulario.`);
+  }
+
+  async function copyText(text, label) {
+    try {
+      await navigator.clipboard.writeText(text);
+      showToast(label + ' copiado al portapapeles.');
+    } catch (err) {
+      const temp = document.createElement('textarea');
+      temp.value = text;
+      temp.style.position = 'fixed'; temp.style.opacity = '0';
+      document.body.appendChild(temp); temp.select();
+      const ok = document.execCommand('copy'); temp.remove();
+      showToast(ok ? label + ' copiado al portapapeles.' : 'No se pudo copiar.');
+    }
+  }
+
+  function downloadText(filename, text) {
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  function cleanFilename(value) {
+    return (value || 'reclamo').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9_-]+/g,'_').replace(/^_+|_+$/g,'').slice(0,60) || 'reclamo';
+  }
+
+  // Listeners
+  $('btnCorte').addEventListener('click', () => setIssue('corte'));
+  $('btnDegradacion').addEventListener('click', () => setIssue('degradacion'));
+  $('tecnologia').addEventListener('change', toggleTechnologyFields);
+
+  document.querySelectorAll('input, select, textarea').forEach(el => {
+    if (el.id !== 'output' && el.id !== 'emailOutput' && el.id !== 'historySearch') {
+      el.addEventListener('input', buildOutput);
+      el.addEventListener('change', buildOutput);
+    }
+  });
+
+  $('btnSaveDb').addEventListener('click', saveToDatabase);
+  $('copyOutput').addEventListener('click', () => copyText($('output').value, 'Reclamo'));
+  $('copyEmail').addEventListener('click', () => copyText($('emailOutput').value, 'Email'));
+  $('downloadOutput').addEventListener('click', () => {
+    const file = `reclamo_${cleanFilename($('servicio').value)}.txt`;
+    downloadText(file, $('output').value);
+    showToast('Plantilla descargada.');
+  });
+
+  $('newTicket').addEventListener('click', () => {
+    if (!window.confirm('¿Empezar un nuevo reclamo? Se borrarán los datos ingresados en esta sesión.')) return;
+    document.querySelectorAll('input, textarea').forEach(el => {
+      if (el.id !== 'output' && el.id !== 'emailOutput' && el.id !== 'historySearch') {
+        if (el.type === 'checkbox') el.checked = false;
+        else el.value = '';
+      }
+    });
+    document.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
+    setIssue('corte');
+    toggleTechnologyFields();
+    showToast('Formulario restablecido.');
+  });
+
+  // Modal Historial
+  $('btnOpenHistory').addEventListener('click', () => {
+    $('historyModal').classList.add('open');
+    loadHistory();
+  });
+  $('btnCloseHistory').addEventListener('click', () => $('historyModal').classList.remove('open'));
+  $('historyModal').addEventListener('click', (e) => {
+    if (e.target === $('historyModal')) $('historyModal').classList.remove('open');
+  });
+  $('historySearch').addEventListener('input', (e) => loadHistory(e.target.value.trim()));
+
+  // Inicialización
+  toggleTechnologyFields();
+  buildOutput();
+  checkApiHealth();
+})();
+</script>
+</body>
+</html>

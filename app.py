@@ -61,10 +61,15 @@ class Ticket(db.Model):
 with app.app_context():
     db.create_all()
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 # Rutas estáticas (Frontend)
 @app.route("/")
 def serve_index():
-    return send_from_directory(".", "index.html")
+    for name in ["index.html", "n1_assist.html"]:
+        if os.path.exists(os.path.join(BASE_DIR, name)):
+            return send_from_directory(BASE_DIR, name)
+    return "No se encontró el archivo HTML en el servidor.", 404
 
 @app.route("/health")
 def health():

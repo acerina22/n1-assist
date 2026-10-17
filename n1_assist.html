@@ -42,6 +42,7 @@
     justify-content: space-between;
     gap: 16px;
     margin-bottom: 18px;
+    flex-wrap: wrap;
   }
   .brand { display: flex; align-items: center; gap: 12px; }
   .brand-mark {
@@ -58,24 +59,26 @@
   }
   .brand-name { font-size: 18px; font-weight: 800; letter-spacing: -.03em; color: var(--navy); }
   .brand-sub { color: var(--muted); font-size: 12px; margin-top: 1px; }
-  .local-pill {
+  .topbar-right { display: flex; align-items: center; gap: 10px; }
+  .status-pill {
     display: inline-flex;
     align-items: center;
     gap: 7px;
     color: #35516f;
     background: #e8eef6;
-    padding: 7px 12px;
+    padding: 7px 13px;
     border-radius: 999px;
     font-size: 12px;
     font-weight: 650;
     white-space: nowrap;
   }
-  .local-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--teal); }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #94a3b8; }
+  .status-dot.online { background: #10b981; box-shadow: 0 0 0 3px #10b98125; }
 
   .hero-compact {
     background: linear-gradient(120deg, #152a46 0%, #1d416d 70%, #275c8c 100%);
     color: white;
-    padding: 20px 24px;
+    padding: 18px 24px;
     border-radius: var(--radius);
     display: flex;
     justify-content: space-between;
@@ -84,7 +87,7 @@
     box-shadow: var(--shadow);
     margin-bottom: 20px;
   }
-  .hero-compact h1 { font-size: 22px; margin: 0 0 4px; letter-spacing: -.03em; }
+  .hero-compact h1 { font-size: 21px; margin: 0 0 3px; letter-spacing: -.03em; }
   .hero-compact p { color: #d5e3f5; margin: 0; font-size: 13px; max-width: 780px; }
   .hero-badge {
     background: #ffffff18;
@@ -156,7 +159,6 @@
     color: #5a6c83;
   }
 
-  /* Selector de Incidencia */
   .issue-selector {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -196,7 +198,6 @@
   .issue-btn strong { display: block; font-size: 14px; color: var(--ink); margin-bottom: 2px; }
   .issue-btn small { color: var(--muted); font-size: 12px; display: block; line-height: 1.35; }
 
-  /* Campos del Formulario */
   .field-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -275,7 +276,6 @@
   }
   .checkbox-row label { margin: 0; font-weight: 600; line-height: 1.35; font-size: 12px; cursor: pointer; }
 
-  /* Columna Derecha: Salida y Acciones */
   .preview-pane {
     position: sticky;
     top: 18px;
@@ -285,7 +285,7 @@
   }
   .summary-box {
     width: 100%;
-    min-height: 380px;
+    min-height: 360px;
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     font-size: 11.5px;
     line-height: 1.55;
@@ -303,7 +303,7 @@
     background: #152031;
   }
   .email-box {
-    min-height: 180px;
+    min-height: 170px;
     background: #fbfcfe;
     color: var(--ink);
     border: 1px solid #d6dfea;
@@ -325,6 +325,8 @@
   .btn:focus-visible { outline: 3px solid #93b4ff; outline-offset: 2px; }
   .btn.primary { color: white; background: var(--blue); box-shadow: 0 4px 10px #2563eb25; }
   .btn.primary:hover { background: var(--blue-hover); }
+  .btn.success { color: white; background: #059669; box-shadow: 0 4px 10px #05966925; }
+  .btn.success:hover { background: #047857; }
   .btn.secondary { color: #34455b; background: #fff; border-color: #d8e0e9; }
   .btn.secondary:hover { background: #f7f9fc; }
   .btn.ghost { color: #65748a; background: transparent; }
@@ -341,7 +343,70 @@
   }
   .actions-group { display: flex; flex-wrap: wrap; gap: 8px; }
 
-  /* Acordeón de Guía / Buenas prácticas */
+  /* Modal de Historial de Tickets */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s ease;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: auto; }
+  .modal-card {
+    background: #fff;
+    width: 90%;
+    max-width: 780px;
+    max-height: 85vh;
+    border-radius: 18px;
+    box-shadow: 0 20px 45px rgba(0,0,0,.2);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .modal-header {
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .modal-header h3 { margin: 0; font-size: 17px; font-weight: 800; color: var(--navy); }
+  .modal-body {
+    padding: 20px 24px;
+    overflow-y: auto;
+    flex: 1;
+  }
+  .modal-search { margin-bottom: 16px; }
+  .ticket-list { display: flex; flex-direction: column; gap: 10px; }
+  .ticket-item {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 12px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    transition: border-color .15s, background .15s;
+  }
+  .ticket-item:hover { border-color: #9bb7f5; background: #fbfdff; }
+  .ticket-info strong { font-size: 14px; color: var(--ink); display: block; margin-bottom: 2px; }
+  .ticket-info small { color: var(--muted); font-size: 12px; }
+  .ticket-badge {
+    padding: 3px 8px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+  .ticket-badge.corte { background: #fee2e2; color: #b91c1c; }
+  .ticket-badge.degradacion { background: #fef3c7; color: #b45309; }
+
   details.guide-accordion {
     background: #fff;
     border: 1px solid var(--line);
@@ -380,7 +445,7 @@
     transform: translate(-50%, 20px);
     opacity: 0;
     pointer-events: none;
-    z-index: 99;
+    z-index: 200;
     color: #fff;
     background: #18304f;
     padding: 11px 18px;
@@ -405,14 +470,6 @@
     .actions-group { width: 100%; }
     .actions-group .btn { flex: 1; }
   }
-  @media print {
-    body { background: #fff; }
-    .topbar, .hero-compact, .form-column, .actions-bar, .guide-accordion, .footer { display: none !important; }
-    .shell { max-width: none; padding: 0; }
-    .layout { display: block; }
-    .card { box-shadow: none; border: 0; padding: 0; }
-    .summary-box { background: #fff; color: #000; border: 0; min-height: auto; }
-  }
 </style>
 </head>
 <body>
@@ -426,19 +483,25 @@
         <div class="brand-sub">Gestión guiada de incidentes · Redes & TI</div>
       </div>
     </div>
-    <div class="local-pill"><span class="local-dot"></span> Vista única · Todo en una sola página</div>
+    <div class="topbar-right">
+      <button class="btn secondary sm" id="btnOpenHistory" type="button">📂 Historial de reclamos</button>
+      <div class="status-pill" id="apiStatusPill">
+        <span class="status-dot" id="apiStatusDot"></span>
+        <span id="apiStatusText">Verificando conexión…</span>
+      </div>
+    </div>
   </header>
 
   <!-- BANNER COMPACTO -->
   <section class="hero-compact">
     <div>
       <h1>Formulario operativo de incidentes</h1>
-      <p>Cargá los datos del cliente y técnicos en el formulario izquierdo. La plantilla de reclamo y el borrador de correo se generan automáticamente en tiempo real.</p>
+      <p>Cargá los datos del cliente y técnicos en el formulario izquierdo. La plantilla de reclamo se genera en tiempo real y puede guardarse en la base de datos.</p>
     </div>
-    <span class="hero-badge">Prototipo local</span>
+    <span class="hero-badge" id="envBadge">Render & Local Ready</span>
   </section>
 
-  <!-- LAYOUT PRINCIPAL DE UNA SOLA PÁGINA -->
+  <!-- LAYOUT PRINCIPAL -->
   <div class="layout">
     <!-- COLUMNA IZQUIERDA: FORMULARIO -->
     <div class="form-column">
@@ -672,7 +735,7 @@
 
     </div>
 
-    <!-- COLUMNA DERECHA: SALIDA Y ACCIONES (STICKY) -->
+    <!-- COLUMNA DERECHA: SALIDA Y ACCIONES -->
     <div class="preview-pane">
       
       <!-- CARD PLANTILLA DE RECLAMO -->
@@ -693,6 +756,7 @@
 
         <div class="actions-bar">
           <div class="actions-group">
+            <button class="btn success" type="button" id="btnSaveDb">💾 Guardar en BD</button>
             <button class="btn primary" type="button" id="copyOutput">📋 Copiar reclamo</button>
             <button class="btn secondary" type="button" id="downloadOutput">💾 Descargar .txt</button>
           </div>
@@ -723,7 +787,7 @@
             <li><strong>Verificación:</strong> Confirmar que el domicilio coincida con el registrado en sistema.</li>
             <li><strong>Requisitos:</strong> Consultar siempre documentación necesaria para el ingreso de técnicos.</li>
             <li><strong>Evidencias:</strong> Pedir fotos de LEDs o resultados de pruebas antes de escalar.</li>
-            <li><strong>Privacidad:</strong> Los datos se procesan únicamente en tu navegador; nada se envía a servidores externos.</li>
+            <li><strong>Persistencia:</strong> Podés guardar los tickets en la base de datos para no perderlos y consultarlos en el Historial.</li>
           </ul>
         </div>
       </details>
@@ -732,8 +796,26 @@
   </div>
 
   <div class="footer">
-    <span>N1 Assist · Prototipo Operativo</span>
-    <span>Versión en una sola página · Sin servidor</span>
+    <span>N1 Assist · Fullstack Ready</span>
+    <span>Soporta Render (PostgreSQL) y ejecución local</span>
+  </div>
+</div>
+
+<!-- MODAL DE HISTORIAL DE TICKETS -->
+<div class="modal-overlay" id="historyModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>Historial de reclamos guardados</h3>
+      <button class="btn ghost sm" id="btnCloseHistory" type="button">✖ Cerrar</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-search">
+        <input type="text" id="historySearch" placeholder="Buscar por cliente, nro. de servicio o título…">
+      </div>
+      <div class="ticket-list" id="ticketList">
+        <div style="text-align:center;padding:30px;color:var(--muted);">Cargando tickets…</div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -743,6 +825,7 @@
 (() => {
   'use strict';
   let issue = 'corte';
+  let apiOnline = false;
   const $ = (id) => document.getElementById(id);
   const values = (ids) => Object.fromEntries(ids.map(id => [id, $(id)?.value?.trim() || '']));
   
@@ -755,7 +838,25 @@
     toast.textContent = message;
     toast.classList.add('show');
     window.clearTimeout(toast._timer);
-    toast._timer = window.setTimeout(() => toast.classList.remove('show'), 2400);
+    toast._timer = window.setTimeout(() => toast.classList.remove('show'), 2600);
+  }
+
+  // Comprobar si el Backend API está activo
+  async function checkApiHealth() {
+    try {
+      const res = await fetch('/health');
+      if (res.ok) {
+        apiOnline = true;
+        $('apiStatusDot').classList.add('online');
+        $('apiStatusText').textContent = 'Base de Datos Conectada';
+        return;
+      }
+    } catch (e) {
+      // Offline / Modo estático
+    }
+    apiOnline = false;
+    $('apiStatusDot').classList.remove('online');
+    $('apiStatusText').textContent = 'Modo Local (Sin BD)';
   }
 
   function setIssue(nextIssue) {
@@ -882,6 +983,135 @@
     }
   }
 
+  // Guardar en la Base de Datos
+  async function saveToDatabase() {
+    const c = getCommon();
+    if (!c.cliente || !c.servicio) {
+      showToast('⚠️ Completá Cliente y Nro. de Servicio para guardar.');
+      (!c.cliente ? $('cliente') : $('servicio')).focus();
+      return;
+    }
+
+    const payload = {
+      issue_type: issue,
+      cliente: c.cliente,
+      servicio: c.servicio,
+      tipo_servicio: c.tipoServicio,
+      horario_falla: c.horarioFalla,
+      titulo: c.titulo,
+      domicilio: c.domicilio,
+      reclama: c.reclama,
+      contacto: c.contacto,
+      horario_visita: c.horario,
+      doc_ingreso: c.docIngreso,
+      tech_data: issue === 'corte' ? values(cutIds) : values(degIds),
+      raw_output: $('output').value
+    };
+
+    if (!apiOnline) {
+      // Si está en modo offline (abierto como archivo), guarda localmente en localStorage
+      try {
+        const local = JSON.parse(localStorage.getItem('n1_saved_tickets') || '[]');
+        payload.id = Date.now();
+        payload.created_at = new Date().toLocaleString('es-AR');
+        local.unshift(payload);
+        localStorage.setItem('n1_saved_tickets', JSON.stringify(local.slice(0, 50)));
+        showToast('✓ Guardado en memoria local de tu navegador.');
+      } catch (e) {
+        showToast('Error al guardar localmente.');
+      }
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/tickets', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        showToast('✓ Ticket guardado con éxito en la Base de Datos.');
+      } else {
+        showToast('Error del servidor al guardar.');
+      }
+    } catch (err) {
+      showToast('No se pudo conectar con el servidor.');
+    }
+  }
+
+  // Cargar Historial
+  async function loadHistory(query = '') {
+    const list = $('ticketList');
+    list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);">Cargando tickets…</div>';
+
+    let tickets = [];
+    if (apiOnline) {
+      try {
+        const url = query ? `/api/tickets?q=${encodeURIComponent(query)}` : '/api/tickets';
+        const res = await fetch(url);
+        if (res.ok) tickets = await res.json();
+      } catch (e) {}
+    } else {
+      // Local fallback
+      try {
+        tickets = JSON.parse(localStorage.getItem('n1_saved_tickets') || '[]');
+        if (query) {
+          const q = query.toLowerCase();
+          tickets = tickets.filter(t => (t.cliente || '').toLowerCase().includes(q) || (t.servicio || '').toLowerCase().includes(q));
+        }
+      } catch (e) {}
+    }
+
+    if (!tickets.length) {
+      list.innerHTML = '<div style="text-align:center;padding:30px;color:var(--muted);">No hay reclamos guardados aún.</div>';
+      return;
+    }
+
+    list.innerHTML = '';
+    tickets.forEach(t => {
+      const item = document.createElement('div');
+      item.className = 'ticket-item';
+      item.innerHTML = `
+        <div class="ticket-info">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;">
+            <span class="ticket-badge ${t.issue_type}">${t.issue_type === 'corte' ? 'CORTE' : 'DEGRADACIÓN'}</span>
+            <small>${t.created_at || ''}</small>
+          </div>
+          <strong>${t.cliente || 'Sin cliente'} · Serv. ${t.servicio || 'S/N'}</strong>
+          <small>${t.titulo || 'Sin descripción'}</small>
+        </div>
+        <button class="btn secondary sm" data-load="${t.id}">Cargar</button>
+      `;
+      item.querySelector('[data-load]').addEventListener('click', () => loadTicketIntoForm(t));
+      list.appendChild(item);
+    });
+  }
+
+  function loadTicketIntoForm(t) {
+    setIssue(t.issue_type || 'corte');
+    $('cliente').value = t.cliente || '';
+    $('servicio').value = t.servicio || '';
+    $('tipoServicio').value = t.tipo_servicio || '';
+    $('horarioFalla').value = t.horario_falla || '';
+    $('titulo').value = t.titulo || '';
+    $('domicilio').value = t.domicilio || '';
+    $('reclama').value = t.reclama || '';
+    $('contacto').value = t.contacto || '';
+    $('horario').value = t.horario_visita || '';
+    $('docIngreso').value = t.doc_ingreso || '';
+
+    if (t.tech_data) {
+      Object.entries(t.tech_data).forEach(([key, val]) => {
+        if ($(key)) $(key).value = val;
+      });
+    }
+
+    toggleTechnologyFields();
+    buildOutput();
+    $('historyModal').classList.remove('open');
+    showToast(`Reclamo #${t.servicio} cargado al formulario.`);
+  }
+
   async function copyText(text, label) {
     try {
       await navigator.clipboard.writeText(text);
@@ -892,7 +1122,7 @@
       temp.style.position = 'fixed'; temp.style.opacity = '0';
       document.body.appendChild(temp); temp.select();
       const ok = document.execCommand('copy'); temp.remove();
-      showToast(ok ? label + ' copiado al portapapeles.' : 'No se pudo copiar; seleccioná el texto manualmente.');
+      showToast(ok ? label + ' copiado al portapapeles.' : 'No se pudo copiar.');
     }
   }
 
@@ -907,19 +1137,19 @@
     return (value || 'reclamo').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9_-]+/g,'_').replace(/^_+|_+$/g,'').slice(0,60) || 'reclamo';
   }
 
-  // Event Listeners
+  // Listeners
   $('btnCorte').addEventListener('click', () => setIssue('corte'));
   $('btnDegradacion').addEventListener('click', () => setIssue('degradacion'));
   $('tecnologia').addEventListener('change', toggleTechnologyFields);
 
-  // Escuchar cambios en todos los inputs para actualizar en tiempo real
   document.querySelectorAll('input, select, textarea').forEach(el => {
-    if (el.id !== 'output' && el.id !== 'emailOutput') {
+    if (el.id !== 'output' && el.id !== 'emailOutput' && el.id !== 'historySearch') {
       el.addEventListener('input', buildOutput);
       el.addEventListener('change', buildOutput);
     }
   });
 
+  $('btnSaveDb').addEventListener('click', saveToDatabase);
   $('copyOutput').addEventListener('click', () => copyText($('output').value, 'Reclamo'));
   $('copyEmail').addEventListener('click', () => copyText($('emailOutput').value, 'Email'));
   $('downloadOutput').addEventListener('click', () => {
@@ -931,7 +1161,7 @@
   $('newTicket').addEventListener('click', () => {
     if (!window.confirm('¿Empezar un nuevo reclamo? Se borrarán los datos ingresados en esta sesión.')) return;
     document.querySelectorAll('input, textarea').forEach(el => {
-      if (el.id !== 'output' && el.id !== 'emailOutput') {
+      if (el.id !== 'output' && el.id !== 'emailOutput' && el.id !== 'historySearch') {
         if (el.type === 'checkbox') el.checked = false;
         else el.value = '';
       }
@@ -942,9 +1172,21 @@
     showToast('Formulario restablecido.');
   });
 
+  // Modal Historial
+  $('btnOpenHistory').addEventListener('click', () => {
+    $('historyModal').classList.add('open');
+    loadHistory();
+  });
+  $('btnCloseHistory').addEventListener('click', () => $('historyModal').classList.remove('open'));
+  $('historyModal').addEventListener('click', (e) => {
+    if (e.target === $('historyModal')) $('historyModal').classList.remove('open');
+  });
+  $('historySearch').addEventListener('input', (e) => loadHistory(e.target.value.trim()));
+
   // Inicialización
   toggleTechnologyFields();
   buildOutput();
+  checkApiHealth();
 })();
 </script>
 </body>
