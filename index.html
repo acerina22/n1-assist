@@ -640,15 +640,18 @@
               <option value="">Sin informar</option>
               <option>Sí</option>
               <option>No</option>
+              <option>No se pudo verificar</option>
             </select>
           </div>
-          <div class="field">
+          <div class="field hidden" id="fieldEnergia">
             <label for="energia">¿Hay energía en el sitio?</label>
             <select id="energia">
               <option value="">Sin informar</option>
               <option>Sí</option>
               <option>No</option>
+              <option>No se pudo verificar</option>
             </select>
+            <div class="hint">Consultar solo si el equipo está apagado o no se pudo verificar si está encendido.</div>
           </div>
           <div class="field">
             <label for="reinicio">¿Se reinició el equipo?</label>
@@ -882,6 +885,14 @@
     buildOutput();
   }
 
+  function toggleEnergyField() {
+    const state = $('encendido').value;
+    const needsEnergyCheck = state === 'No' || state === 'No se pudo verificar';
+    $('fieldEnergia').classList.toggle('hidden', !needsEnergyCheck);
+    if (!needsEnergyCheck) $('energia').value = '';
+    buildOutput();
+  }
+
   function pair(label, value) {
     return `${label.padEnd(27, ' ')}: ${value || 'No informado'}`;
   }
@@ -925,7 +936,7 @@
       if (v.tecnologia === 'MetroEthernet') lines.push(pair('SWITCH / PUERTO', v.switchPuerto));
       lines.push(
         pair('EQUIPO ENCENDIDO', v.encendido),
-        pair('ENERGÍA EN SITIO', v.energia),
+        ...(v.encendido === 'No' || v.encendido === 'No se pudo verificar' ? [pair('ENERGÍA EN SITIO', v.energia)] : []),
         pair('EQUIPO REINICIADO', v.reinicio),
         pair('ALARMA VISIBLE', v.alarma),
         pair('TIPO DE ALARMA', v.tipoAlarma),
@@ -1107,6 +1118,7 @@
     }
 
     toggleTechnologyFields();
+    toggleEnergyField();
     buildOutput();
     $('historyModal').classList.remove('open');
     showToast(`Reclamo #${t.servicio} cargado al formulario.`);
@@ -1141,6 +1153,7 @@
   $('btnCorte').addEventListener('click', () => setIssue('corte'));
   $('btnDegradacion').addEventListener('click', () => setIssue('degradacion'));
   $('tecnologia').addEventListener('change', toggleTechnologyFields);
+  $('encendido').addEventListener('change', toggleEnergyField);
 
   document.querySelectorAll('input, select, textarea').forEach(el => {
     if (el.id !== 'output' && el.id !== 'emailOutput' && el.id !== 'historySearch') {
@@ -1185,6 +1198,7 @@
 
   // Inicialización
   toggleTechnologyFields();
+  toggleEnergyField();
   buildOutput();
   checkApiHealth();
 })();
