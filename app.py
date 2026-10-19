@@ -13,6 +13,10 @@ CORS(app)
 db_url = os.environ.get("DATABASE_URL", "sqlite:///n1_assist.db")
 if db_url.startswith("postgres://"):
     db_url = db_url.replace("postgres://", "postgresql://", 1)
+# Usar explícitamente psycopg2, que ya está instalado en requirements.txt.
+# Evita que SQLAlchemy intente importar el controlador psycopg (versión 3).
+if db_url.startswith("postgresql://"):
+    db_url = db_url.replace("postgresql://", "postgresql+psycopg2://", 1)
 
 app.config["SQLALCHEMY_DATABASE_URI"] = db_url
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
