@@ -74,6 +74,7 @@
   }
   .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #94a3b8; }
   .status-dot.online { background: #10b981; box-shadow: 0 0 0 3px #10b98125; }
+  .status-dot.warning { background: #d97706; box-shadow: 0 0 0 3px #d9770625; }
 
   .hero-compact {
     background: linear-gradient(120deg, #152a46 0%, #1d416d 70%, #275c8c 100%);
@@ -843,20 +844,30 @@
 
   // Comprobar si el Backend API está activo
   async function checkApiHealth() {
+    const dot = $('apiStatusDot');
     try {
-      const res = await fetch('/health');
-      if (res.ok) {
+      const res = await fetch('/health', { cache: 'no-store' });
+      const health = await res.json();
+      if (res.ok && health.database === 'ok') {
         apiOnline = true;
-        $('apiStatusDot').classList.add('online');
-        $('apiStatusText').textContent = 'Base de Datos Conectada';
+        dot.classList.remove('warning');
+        dot.classList.add('online');
+        if (health.database_type === 'sqlite') {
+          dot.classList.add('warning');
+          dot.classList.remove('online');
+          $('apiStatusText').textContent = 'BD activa · SQLite local (no persistente)';
+        } else {
+          $('apiStatusText').textContent = 'Servidor y base de datos conectados';
+        }
         return;
       }
     } catch (e) {
-      // Offline / Modo estático
+      // Servidor inaccesible o abierto como archivo local.
     }
     apiOnline = false;
-    $('apiStatusDot').classList.remove('online');
-    $('apiStatusText').textContent = 'Modo Local (Sin BD)';
+    dot.classList.remove('online');
+    dot.classList.add('warning');
+    $('apiStatusText').textContent = 'Sin conexión a la BD · guardado local';
   }
 
   function setIssue(nextIssue) {
@@ -1030,12 +1041,14 @@
         body: JSON.stringify(payload)
       });
       if (res.ok) {
-        showToast('✓ Ticket guardado con éxito en la Base de Datos.');
+        showToast(apiOnline
+          ? '✓ Reclamo guardado en la base de datos.'
+          : '✓ Reclamo guardado localmente en este navegador.');
       } else {
-        showToast('Error del servidor al guardar.');
+        showToast('No se pudo guardar en el servidor. El reclamo no fue confirmado.');
       }
     } catch (err) {
-      showToast('No se pudo conectar con el servidor.');
+      showToast('No se pudo guardar en el servidor. El reclamo no fue confirmado.');
     }
   }
 
