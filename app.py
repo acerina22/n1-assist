@@ -4,6 +4,7 @@ from datetime import datetime
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import text
 
 app = Flask(__name__, static_folder=".", static_url_path="")
 CORS(app)
@@ -73,7 +74,24 @@ def serve_index():
 
 @app.route("/health")
 def health():
-    return jsonify({"status": "ok", "time": datetime.utcnow().isoformat()})
+    """Verifica tanto el servidor como la conexión real a la base de datos."""
+    database_type = "postgresql" if app.config["SQLALCHEMY_DATABASE_URI"].startswith("postgresql://") else "sqlite"
+    try:
+        db.session.execute(text("SELECT 1"))
+        return jsonify({
+            "status": "ok",
+            "database": "ok",
+            "database_type": database_type,
+            "time": datetime.utcnow().isoformat()
+        })
+    except Exception:
+        db.session.rollback()
+        return jsonify({
+            "status": "degraded",
+            "database": "error",
+            "database_type": database_type,
+            "time": datetime.utcnow().isoformat()
+        }), 503
 
 # Rutas de la API de Tickets
 @app.route("/api/tickets", methods=["GET"])
